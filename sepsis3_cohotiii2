@@ -1,4 +1,5 @@
---esta tabla incluye a los pacientes con sospecha de infección despues de 24 horas, ya que fueron excluídos en el estudio de Alistair
+--Esta tabla contiene cambios en querys realizadas por Alistair Jhonson.
+--Esta tabla incluye a los pacientes con sospecha de infección despues de 24 horas, ya que fueron excluídos en el estudio de Alistair
 --this table requires:
 --  abx_poe_list
 --  abx_micro_poe
