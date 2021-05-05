@@ -1,3 +1,6 @@
+--Esta tabla contiene cambios en querys realizadas por Alistair Jhonson
+
+
 DROP TABLE IF EXISTS SEPSIS_FEB2 CASCADE;
 CREATE TABLE SEPSIS_FEB2 AS
 select co.icustay_id, co.hadm_id, co.subject_id,
