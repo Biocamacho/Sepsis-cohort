@@ -1,14 +1,6 @@
 --esta consulta toma los datos de sepsis3 donde considerando la exclusion de pacientes:
+--Esta tabla contiene cambios en querys realizadas por Alistair Jhonson
 --Menores de 18 años, 
---15056 (24.47%) - exclusion_secondarystay
- --8109 (13.18%) - exclusion_nonadult
- --7343 (11.93%) - exclusion_csurg (“los riesgos son diferentes comparado con los otros pacientes de la UCI”)
- --37912 (61.61%) - exclusion_carevue ¿Por que se excluye careview?
-  -- 7343 (11.93%) - exclusion_early_suspicion (para 24 horas antes de la admisión a UCI)
-   --3914 (6.36%) - exclusion_late_suspicion (y más de 24 horas des-pués de la admisión en la UCI, ya que elegimos enfocar a la mayoría de los pacientes que ingresan a la UCI con sepsis)
-    --491 (0.80%) - exclusion_bad_data
---Final cohort size: 11791.0 ICU stays (19.16%).
-
 DROP MATERIALIZED VIEW IF EXISTS sepsis8_ii CASCADE;
 CREATE MATERIALIZED VIEW sepsis8_ii AS
 
