@@ -1,0 +1,119 @@
+--esta consulta toma los datos de sepsis3 donde considerando la exclusion de pacientes:
+--Menores de 18 años, 
+--15056 (24.47%) - exclusion_secondarystay
+ --8109 (13.18%) - exclusion_nonadult
+ --7343 (11.93%) - exclusion_csurg (“los riesgos son diferentes comparado con los otros pacientes de la UCI”)
+ --37912 (61.61%) - exclusion_carevue ¿Por que se excluye careview?
+  -- 7343 (11.93%) - exclusion_early_suspicion (para 24 horas antes de la admisión a UCI)
+   --3914 (6.36%) - exclusion_late_suspicion (y más de 24 horas des-pués de la admisión en la UCI, ya que elegimos enfocar a la mayoría de los pacientes que ingresan a la UCI con sepsis)
+    --491 (0.80%) - exclusion_bad_data
+--Final cohort size: 11791.0 ICU stays (19.16%).
+
+DROP MATERIALIZED VIEW IF EXISTS sepsis8_ii CASCADE;
+CREATE MATERIALIZED VIEW sepsis8_ii AS
+
+--Pacientes muertos hay que arreglarlo
+  select se.icustay_id as icustay_id
+ ,se.subject_id as subject_id 
+ ,se.hadm_id as hadm_id
+ ,se.intime as intime
+ ,se.vent_starttime as vent_starttime --tiempo de inicio de ventilación 
+ ,se.outtime as outtime
+ --SObre infecciones
+    ,se.suspected_of_infection_poe as sospecha_infeccion
+ 	,se.suspected_infection_time_poe as tiempo_sospecha_infeccion
+    ,se.suspected_infection_time_poe_days as tiempo_sospecha_infeccion_dias
+	, se.si_starttime
+    , se.si_endtime
+    ,se.specimen_poe as especimen
+    ,se.positiveculture_poe as positivo_infeccion
+    ,se.antibiotic_time_poe as tiempo_antibiotico
+ ,se.age as age
+ ,se.qsofa as qsofa
+ ,se.sofa as sofa
+ ,se.sirs as sirs
+ ,se.icu_los as icu_los
+ ,se.sepsis_explicit as sepsis
+ ,se.vent as vent
+ --,se.died as died
+-- ,se.height as height
+ ,se.weight as weight
+ ,se.metastatic_cancer as cancer
+ ,se.diabetes as diabetes
+ ,se.race_white as race_white
+ ,se.race_black as race_black
+ ,se.race_hispanic as race_hispanic
+ --,se.excluded as excluded
+ --variables de laboratorio clínico
+ ,l.wbc_min as wbc_min
+ ,l.wbc_max as wbc_max
+ ,l.lactate_max as lactate_max
+ ,l.lactate_min as lactate_min
+ ,l.glucose_min as glucose_min
+ ,l.glucose_max as glucose_max
+ ,l.hematocrit_min as hematocrit_min
+ ,l.hematocrit_max as hematocrit_max
+ ,l.hemoglobin_min as hemoglobin_min
+ ,l.hemoglobin_max as hemoglobin_max
+-- ,l.pt_min as pt_min
+-- ,l.pt_max as pt_max
+-- ,l.platelet_min as platelet_min
+-- ,l.platelet_max as platelet_max
+--,l.potassium_min as potassium_min
+-- ,l.potassium_max as potassium_max
+-- ,l.chloride_min as chloride_min
+-- ,l.chloride_max as chloride_max
+-- ,l.creatinine_min as creatinine_min
+-- ,l.creatinine_max as creatinine_max
+--,l.bilirubin_min as bilirubin_min
+--,l.bilirubin_max as bilirubin_max
+-- ,l.aniongap_max as aniongap_max
+-- ,l.aniongap_min as aniongap_min
+ 
+ 
+ 
+--Variables signos vitales
+  ,v.SysBP_Min
+  ,v.SysBP_Max
+  ,v.SysBP_Mean
+  ,v.RespRate_min
+  ,v.RespRate_mean
+  ,v.RespRate_max
+  ,v.spo2_max
+  ,v.spo2_min
+  ,v.spo2_mean	
+  ,gcs.MinGCS
+  ,v.Tempc_Max
+  ,v.Tempc_Min 
+  ,v.Tempc_Mean
+  ,v.Heartrate_Max
+  ,v.Heartrate_Min
+  ,v.Heartrate_Mean
+  --pacientes muertos
+ --, se.dod
+  , 
+	case 
+    when se.dod_hosp <= se.outtime then 1
+    else 0
+  end died
+  , 
+  case 
+  when se.icu_los > 6 then 1
+  else 0
+  end icu_los6
+  
+	
+from sepsis_feb2 se
+
+left join vitalsfirstday v
+  on se.icustay_id = v.icustay_id
+left join gcsfirstday gcs
+  on se.icustay_id = gcs.icustay_id
+left join labsfirstday l
+  on se.icustay_id = l.icustay_id
+--si es necesario realizar este left join? para los pacientes muertos?
+ left join patients pa
+ on pa.subject_id = se.subject_id 
+
+ WHERE (excluded = 0)
+ order by se.icustay_id;
